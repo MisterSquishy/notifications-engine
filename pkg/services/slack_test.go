@@ -30,6 +30,7 @@ func TestGetTemplater_Slack(t *testing.T) {
 			Blocks:          "{{.bar}}",
 			GroupingKey:     "{{.foo}}-{{.bar}}",
 			NotifyBroadcast: true,
+			Ts:              "12345",
 		},
 	}
 	templater, err := n.GetTemplater("", template.FuncMap{})
@@ -52,6 +53,7 @@ func TestGetTemplater_Slack(t *testing.T) {
 	assert.Equal(t, "world", notification.Slack.Blocks)
 	assert.Equal(t, "hello-world", notification.Slack.GroupingKey)
 	assert.Equal(t, true, notification.Slack.NotifyBroadcast)
+	assert.Equal(t, "12345", notification.Slack.Ts)
 }
 
 func TestBuildMessageOptionsWithNonExistTemplate(t *testing.T) {

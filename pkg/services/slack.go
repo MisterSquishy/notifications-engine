@@ -27,6 +27,7 @@ type SlackNotification struct {
 	GroupingKey     string                   `json:"groupingKey"`
 	NotifyBroadcast bool                     `json:"notifyBroadcast"`
 	DeliveryPolicy  slackutil.DeliveryPolicy `json:"deliveryPolicy"`
+	Ts              string                   `json:"ts"`
 }
 
 func (n *SlackNotification) GetTemplater(name string, f texttemplate.FuncMap) (Templater, error) {
@@ -39,6 +40,10 @@ func (n *SlackNotification) GetTemplater(name string, f texttemplate.FuncMap) (T
 		return nil, err
 	}
 	groupingKey, err := texttemplate.New(name).Funcs(f).Parse(n.GroupingKey)
+	if err != nil {
+		return nil, err
+	}
+	ts, err := texttemplate.New(name).Funcs(f).Parse(n.Ts)
 	if err != nil {
 		return nil, err
 	}
@@ -64,6 +69,12 @@ func (n *SlackNotification) GetTemplater(name string, f texttemplate.FuncMap) (T
 			return err
 		}
 		notification.Slack.GroupingKey = groupingKeyData.String()
+
+		var tsData bytes.Buffer
+		if err := ts.Execute(&tsData, vars); err != nil {
+			return err
+		}
+		notification.Slack.Ts = tsData.String()
 
 		notification.Slack.NotifyBroadcast = n.NotifyBroadcast
 		notification.Slack.DeliveryPolicy = n.DeliveryPolicy
@@ -122,6 +133,11 @@ func buildMessageOptions(notification Notification, dest Destination, opts Slack
 			}
 		}
 		msgOptions = append(msgOptions, slack.MsgOptionAttachments(attachments...), slack.MsgOptionBlocks(blocks.BlockSet...))
+
+		if notification.Slack.Ts != "" {
+			msgOptions = append(msgOptions, slack.MsgOptionTS(notification.Slack.Ts))
+		}
+
 		slackNotification = notification.Slack
 	}
 

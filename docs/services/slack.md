@@ -120,6 +120,8 @@ The messages can be aggregated to the slack threads by grouping key which can be
 `groupingKey` is used across each template and works independently on each slack channel.
 When multiple applications will be updated at the same time or frequently, the messages in slack channel can be easily read by aggregating with git commit hash, application name, etc.
 Furthermore, the messages can be broadcast to the channel at the specific template by `notifyBroadcast` field.
+You can also pass a `ts` indicating the timestamp of the slack message from which you would like to thread the notification.
+If `ts` and `groupingKey` are both set, `groupingKey` will take precedence.
 
 ```yaml
 template.app-sync-status: |
